@@ -172,15 +172,7 @@ public class SatelliteInterLinkInfo {
     public List<DTNHost> getHosts() {
         return new ArrayList<DTNHost>(((SatelliteMovement) this.getHost().getMovementModel()).getHosts());
     }
-	public List<DTNHost> findAllMEOHosts(){
-		List<DTNHost> MEOLists = new ArrayList<DTNHost>();
-		for (DTNHost h : this.getHosts()){
-			if (h.getSatelliteType().contains("MEO")){
-				MEOLists.add(h);
-			}			
-		}
-		return MEOLists;
-	}
+	
     /**
      * Find the DTNHost according to its address
      *
@@ -379,9 +371,9 @@ public class SatelliteInterLinkInfo {
         /** all hosts in the same orbit plane*/
         public List<DTNHost> allHostsInSamePlane = new ArrayList<DTNHost>();
         /** neighbor hosts in the same orbit plane, and they can be forwarded directly*/
-        private List<DTNHost> allowConnectLEOHostsInSamePlane = new ArrayList<DTNHost>();
+        private List<DTNHost> allowConnectMEOHostsInSamePlane = new ArrayList<DTNHost>();
         /** neighbor hosts in two neighbor orbit plane, and they can be forwarded directly*/
-        private List<DTNHost> allowConnectLEOHostsInNeighborPlane = new ArrayList<DTNHost>();
+        private List<DTNHost> allowConnectMEOHostsInNeighborPlane = new ArrayList<DTNHost>();
         /** neighbor hosts in the neighbor orbit plane*/
         public List<DTNHost> neighborPlaneHosts = new ArrayList<DTNHost>();//相邻轨道平面内的两个邻居节点
         /** hosts list in the same orbit plane, and they can be forwarded directly without MEO */
@@ -436,8 +428,8 @@ public class SatelliteInterLinkInfo {
             	a = endNumber;
             if (b > endNumber)
             	b = startNumber;
-            allowConnectLEOHostsInSamePlane.add(findHostByAddress(a));
-            allowConnectLEOHostsInSamePlane.add(findHostByAddress(b));
+            allowConnectMEOHostsInSamePlane.add(findHostByAddress(a));
+            allowConnectMEOHostsInSamePlane.add(findHostByAddress(b));
         }
         /**
          * 初始化设定本节点的两个邻居轨道平面所有节点于allowConnectMEOHostsInNeighborPlane中
@@ -462,7 +454,7 @@ public class SatelliteInterLinkInfo {
             //如果目的节点在邻居轨道平面上，就找出这个目的节点所属轨道平面的所有的节点
             for (DTNHost host : getHosts()){
                 if (host.getAddress() >= startNumber1 && host.getAddress() <= endNumber1){
-                	allowConnectLEOHostsInNeighborPlane.add(host);
+                	allowConnectMEOHostsInNeighborPlane.add(host);
                 }
             }
             //右邻居MEO轨道平面
@@ -472,7 +464,7 @@ public class SatelliteInterLinkInfo {
             //如果目的节点在邻居轨道平面上，就找出这个目的节点所属轨道平面的所有的节点
             for (DTNHost host : getHosts()){
                 if (host.getAddress() >= startNumber2 && host.getAddress() <= endNumber2){
-                	allowConnectLEOHostsInNeighborPlane.add(host);
+                	allowConnectMEOHostsInNeighborPlane.add(host);
                 }
             }
         }
@@ -480,15 +472,15 @@ public class SatelliteInterLinkInfo {
          * 同一平面内的邻居两个节点
          * @return
          */
-        public List<DTNHost> getAllowConnectLEOHostsInLEOSamePlane(){
-        	return allowConnectLEOHostsInSamePlane;
+        public List<DTNHost> getAllowConnectMEOHostsInLEOSamePlane(){
+        	return allowConnectMEOHostsInSamePlane;
         }
         /**
          * neighbor hosts in two neighbor orbit plane
          * @return
          */
-        public List<DTNHost> getAllowConnectLEOHostsInNeighborPlane(){
-        	return allowConnectLEOHostsInNeighborPlane;
+        public List<DTNHost> getAllowConnectMEOHostsInNeighborPlane(){
+        	return allowConnectMEOHostsInNeighborPlane;
         }
         /**
          * 动态找到MEO的当前邻居轨道的最近两个节点用户邻居通信
@@ -497,14 +489,9 @@ public class SatelliteInterLinkInfo {
         public List<DTNHost> updateAllowConnectLEOHostsInNeighborPlane(){
         	List<DTNHost> list = new ArrayList<DTNHost>();
         	
-        	if (!thisNode.getRouter().CommunicationSatellitesLabel)
-        		return list;//非通信节点，直接返回，不会和邻居轨道的LEO节点建立连接
-        	
         	List<Tuple<DTNHost, Double>> listFromDistance = new ArrayList<Tuple<DTNHost, Double>>();
-        	for (DTNHost h : getAllowConnectLEOHostsInNeighborPlane()){
-        		if (thisNode.getRouter().CommunicationNodesList.containsKey(h)){//确定是一个通信节点
-        			listFromDistance.add(new Tuple<DTNHost, Double>(h, getDistance(thisNode, h)));
-        		}
+        	for (DTNHost h : getAllowConnectMEOHostsInNeighborPlane()){
+        		listFromDistance.add(new Tuple<DTNHost, Double>(h, getDistance(thisNode, h)));
         	}
         	sort(listFromDistance);
         	for (Tuple<DTNHost, Double> t : listFromDistance){
@@ -513,7 +500,7 @@ public class SatelliteInterLinkInfo {
         		else{
         			//不是同一个轨道平面的
         			if (!((SatelliteMovement)list.get(0).getMovementModel()).
-        					getSatelliteLinkInfo().getLEOci().getAllowConnectLEOHostsInLEOSamePlane().contains(t.getKey())){
+        					getSatelliteLinkInfo().getLEOci().getAllowConnectMEOHostsInLEOSamePlane().contains(t.getKey())){
         					list.add(t.getKey());	
         					}
         		}
@@ -569,18 +556,6 @@ public class SatelliteInterLinkInfo {
          */
         public List<DTNHost> getAllHostsInSamePlane(){
             return allHostsInSamePlane;
-        }
-        /**
-         * @return all communication LEO nodes in this LEO orbit plane
-         */
-        public List<DTNHost> getAllCommunicationNodes(){
-        	List<DTNHost> CommunicationNodes = new ArrayList<DTNHost>();
-        	for (DTNHost LEO : this.getAllHostsInSamePlane()){
-        		if (LEO.getRouter().CommunicationSatellitesLabel){
-        			CommunicationNodes.add(LEO);
-        		}
-        	}
-        	return CommunicationNodes;
         }
         /**
          * @return hosts list contains all LEO nodes in the same plane

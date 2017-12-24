@@ -75,15 +75,8 @@ public class SatelliteMovement extends MovementModel {
     	case "LEO":{
     		if (this.satelliteLinkInfo.getLEOci() == null)
     			break;
-    		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getLEOci().getAllowConnectLEOHostsInLEOSamePlane());
+    		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getLEOci().getAllowConnectMEOHostsInLEOSamePlane());
     		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getLEOci().updateAllowConnectLEOHostsInNeighborPlane());
-    		//只有通信节点才能和MEO节点进行通信
-    		if (this.getHost().getRouter().CommunicationSatellitesLabel 
-    				&& dynamicClustering){
-    			List<DTNHost> MEOLists = this.satelliteLinkInfo.findAllMEOHosts();
-    			if (!MEOLists.isEmpty())
-    				allowConnectedListInSameLayer.addAll(MEOLists);
-    		}
     		break;
     	}
     	case "MEO":{

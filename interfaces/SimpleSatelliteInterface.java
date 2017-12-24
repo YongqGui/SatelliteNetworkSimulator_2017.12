@@ -160,13 +160,22 @@ public class SimpleSatelliteInterface extends NetworkInterface {
 				switch(this.getHost().getSatelliteType()){
 				/*如果在范围内的这个节点既不是同一平面内的，又不是通讯节点，就不进行连接，节省开销**/
 					case "LEO":{						
-						//只用LEO通信节点才允许和MEO层建立链路
+						//LEO 只允许和MEO层建立链路
+						if (dynamicClustering && i.getHost().getSatelliteType().contains("MEO")){
+							allowConnection = true;
+							break;
+						}
 						if (allowConnectedList.contains(i.getHost()))
 							allowConnection = true;//即进行连接
 						break;
 					}
 					case "MEO":{
-						//MEO只允许和LEO通信节点通信和GEO层建立链路
+						//MEO允许和LEO和GEO层建立链路
+						if (dynamicClustering && (i.getHost().getSatelliteType().contains("LEO") 
+								|| i.getHost().getSatelliteType().contains("GEO"))){
+							allowConnection = true;
+							break;
+						}
 						if (allowConnectedList.contains(i.getHost()))
 							allowConnection = true;//即进行连接
 						break;
