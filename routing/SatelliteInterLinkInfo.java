@@ -81,12 +81,11 @@ public class SatelliteInterLinkInfo {
     	Settings setting = new Settings(INTERFACENAME_S);
     	msgThreshold = setting.getInt(MSG_SIZE_THRESHOLD_S);
     	//LEO  	
-        Settings sat = new Settings(GROUPNAME_S);
-        LEO_TOTAL_SATELLITES = sat.getInt("nrofLEO");//总节点数
-        LEO_TOTAL_PLANE = sat.getInt("nrofLEOPlanes");//总轨道平面数
+        Settings s = new Settings(GROUPNAME_S);
+        LEO_TOTAL_SATELLITES = s.getInt("nrofLEO");//总节点数
+        LEO_TOTAL_PLANE = s.getInt("nrofLEOPlanes");//总轨道平面数
         LEO_NROF_S_EACHPLANE = LEO_TOTAL_SATELLITES/LEO_TOTAL_PLANE;//每个轨道平面上的节点数
         //MEO
-        Settings s = new Settings("Group");
         if (s.getBoolean("EnableMEO")){
             MEO_TOTAL_SATELLITES = s.getInt("nrofMEO");//总节点数
             MEO_TOTAL_PLANE = s.getInt("nrofMEOPlane");//总轨道平面数
@@ -94,9 +93,9 @@ public class SatelliteInterLinkInfo {
         }
         //GEO
         if (s.getBoolean("EnableGEO")){
-            GEO_TOTAL_SATELLITES = s.getInt("nrofMEO");//总节点数
-            GEO_TOTAL_PLANE = s.getInt("nrofMEOPlane");//总轨道平面数
-            GEO_NROF_S_EACHPLANE = MEO_TOTAL_SATELLITES/MEO_TOTAL_PLANE;//每个轨道平面上的节点数
+            GEO_TOTAL_SATELLITES = s.getInt("nrofGEO");//总节点数
+            GEO_TOTAL_PLANE = s.getInt("nrofGEOPlane");//总轨道平面数
+            GEO_NROF_S_EACHPLANE = GEO_TOTAL_SATELLITES/GEO_TOTAL_PLANE;//每个轨道平面上的节点数
         }
         clusterInfoInit();
         //if it is static clustering, then start initialization
@@ -147,6 +146,9 @@ public class SatelliteInterLinkInfo {
             case "MEO":{
                 MEOci.updateClusterMember();
                 return true;
+            }
+            case "GEO":{
+            	return true;
             }
         }
         throw new SimError("Satellite Type Error!");
@@ -855,7 +857,7 @@ public class SatelliteInterLinkInfo {
 
             int thisHostAddress = getHost().getAddress();
 
-            int serialNumberOfPlane = thisHostAddress/MEO_NROF_S_EACHPLANE + 1;
+            int serialNumberOfPlane = nrofMEOPlane;
             int a = serialNumberOfPlane - 1;
             int b = serialNumberOfPlane + 1;
             if (a < 1)
@@ -890,7 +892,7 @@ public class SatelliteInterLinkInfo {
          */
         public List<DTNHost> updateAllowConnectMEOHostsInNeighborPlane(){
         	List<DTNHost> list = new ArrayList<DTNHost>();
-        	
+
         	List<Tuple<DTNHost, Double>> listFromDistance = new ArrayList<Tuple<DTNHost, Double>>();
         	for (DTNHost h : getAllowConnectMEOHostsInNeighborPlane()){
         		listFromDistance.add(new Tuple<DTNHost, Double>(h, getDistance(thisNode, h)));
@@ -985,7 +987,7 @@ public class SatelliteInterLinkInfo {
          * @return cluster list
          */
         public List<DTNHost> getClusterList(){
-            return clusterList;
+            return clusterList;//返回的是MEO层相互连接的MEO节点
         }
         /**
          * delete other unaccessible MEO node
@@ -1077,7 +1079,7 @@ public class SatelliteInterLinkInfo {
             //设置本GEO轨道平面内的开始/结束节点编号，以及GEO平面编号
             setPlaneNumber();
             //同轨道平面内邻居的两个节点
-            findAllowConnectGEOHostsInSamePlane(thisNode.getAddress()/GEO_NROF_S_EACHPLANE + 1, GEO_NROF_S_EACHPLANE);
+            findAllowConnectGEOHostsInSamePlane(nrofGEOPlane, GEO_NROF_S_EACHPLANE);
             //同轨道平面内所有节点
             findAllSatellitesInSamePlane(thisNode.getAddress()/GEO_NROF_S_EACHPLANE + 1, GEO_NROF_S_EACHPLANE);
             //初始化设定本节点的两个邻居轨道平面所有节点
@@ -1087,9 +1089,10 @@ public class SatelliteInterLinkInfo {
          * 计算本GEO节点所属的轨道参数
          */
         public void setPlaneNumber(){
-        	this.nrofGEOPlane = (thisNode.getAddress() - LEO_TOTAL_SATELLITES - GEO_TOTAL_SATELLITES)/GEO_NROF_S_EACHPLANE + 1;//默认下取整
+        	this.nrofGEOPlane = (thisNode.getAddress() - LEO_TOTAL_SATELLITES - MEO_TOTAL_SATELLITES)/GEO_NROF_S_EACHPLANE + 1;//默认下取整
         	this.startNumberInSameGEOPlane = LEO_TOTAL_SATELLITES + MEO_TOTAL_SATELLITES + GEO_NROF_S_EACHPLANE * (nrofGEOPlane - 1);//此轨道平面内的节点，起始编号
             this.endNumberInSameGEOPlane = LEO_TOTAL_SATELLITES + MEO_TOTAL_SATELLITES + GEO_NROF_S_EACHPLANE * nrofGEOPlane - 1;//此轨道平面内的节点，结尾编号
+            System.out.println(thisNode+" GEO "+nrofGEOPlane+"  "+startNumberInSameGEOPlane+"  "+endNumberInSameGEOPlane);
         }
         /**
          * 初始化找到所有GEO属性节点
@@ -1108,9 +1111,10 @@ public class SatelliteInterLinkInfo {
          * @param nrofSatelliteInOnePlane
          */
         public void findAllowConnectGEOHostsInSamePlane(int nrofPlane, int nrofSatelliteInOnePlane){ 
-            int	startNumber = LEO_TOTAL_SATELLITES + MEO_TOTAL_SATELLITES + GEO_NROF_S_EACHPLANE * (nrofPlane - 1);//此轨道平面内的节点，起始编号
+            int	startNumber = LEO_TOTAL_SATELLITES + MEO_TOTAL_SATELLITES;//此轨道平面内的节点，起始编号
             int endNumber = LEO_TOTAL_SATELLITES + MEO_TOTAL_SATELLITES + GEO_NROF_S_EACHPLANE * nrofPlane - 1;//此轨道平面内的节点，结尾编号
             if (!(thisNode.getAddress() >= startNumber && thisNode.getAddress()<= endNumber)){
+            	
             	throw new SimError("GEO address calculation error");
             }
             int a = thisNode.getAddress() - 1;

@@ -76,11 +76,17 @@ public class SatelliteMovement extends MovementModel {
     		if (this.satelliteLinkInfo.getLEOci() == null)
     			break;
     		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getLEOci().getAllowConnectLEOHostsInLEOSamePlane());
-    		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getLEOci().updateAllowConnectLEOHostsInNeighborPlane());
+    		//allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getLEOci().updateAllowConnectLEOHostsInNeighborPlane());
     		//只有通信节点才能和MEO节点进行通信
-    		if (this.getHost().getRouter().CommunicationSatellitesLabel 
-    				&& dynamicClustering){
-    			List<DTNHost> MEOLists = this.satelliteLinkInfo.findAllMEOHosts();
+    		if (this.getHost().getRouter().CommunicationSatellitesLabel){
+    			List<DTNHost> MEOLists = new ArrayList<DTNHost>();
+    			if (getDynamicClustering())
+    				MEOLists.addAll(this.satelliteLinkInfo.findAllMEOHosts());
+    			else{
+    				//添加静态分簇指定的管理节点，由initStaticClustering()初始化，在SimScenario.java中调用
+    				MEOLists.addAll(this.getSatelliteLinkInfo().getLEOci().getManageHosts());
+    				//System.out.println(this.getHost()+" mh: "+this.getSatelliteLinkInfo().getLEOci().getManageHosts());
+    			}
     			if (!MEOLists.isEmpty())
     				allowConnectedListInSameLayer.addAll(MEOLists);
     		}
@@ -92,9 +98,10 @@ public class SatelliteMovement extends MovementModel {
     		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getMEOci().updateAllowConnectMEOHostsInNeighborPlane());
     		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getMEOci().getAllowConnectMEOHostsInSamePlane());
     		//添加静态分簇指定的LEO簇内节点
-        	if (!dynamicClustering){
-        		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getMEOci().getClusterList());
-        	}
+//        	if (!dynamicClustering){
+//        		allowConnectedListInSameLayer.addAll(this.satelliteLinkInfo.getMEOci().getClusterList());
+//        		System.out.println(this.getHost()+" cluster "+this.satelliteLinkInfo.getMEOci().getClusterList());
+//        	}
     		break;
     	}
     	case "GEO":{

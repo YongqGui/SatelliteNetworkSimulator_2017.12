@@ -152,8 +152,8 @@ public class SimpleSatelliteInterface extends NetworkInterface {
 			if (!this.getHost().multiThread) {
 				// Then find new possible connections
 				interfaces = optimizer.getNearInterfaces(this);
-			}				
-
+			}		
+			
 			for (NetworkInterface i : interfaces) {	
 				/*检查是否处在允许建链的列表当中，否则不允许建立链路*/
 				boolean allowConnection = false;

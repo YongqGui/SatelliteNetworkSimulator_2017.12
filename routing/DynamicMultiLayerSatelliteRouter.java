@@ -153,9 +153,15 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
             }
             //GEO
             if (s.getBoolean("EnableGEO")){
+<<<<<<< HEAD
                 GEO_TOTAL_SATELLITES = s.getInt("nrofMEO");//总节点数
                 GEO_TOTAL_PLANE = s.getInt("nrofMEOPlane");//总轨道平面数
   
+=======
+                GEO_TOTAL_SATELLITES = s.getInt("nrofGEO");//总节点数
+                GEO_TOTAL_PLANE = s.getInt("nrofGEOPlane");//总轨道平面数
+                GEO_NROF_S_EACHPLANE = GEO_TOTAL_SATELLITES/GEO_TOTAL_PLANE;//每个轨道平面上的节点数
+>>>>>>> fcc2628832a286fb77aa2d408a12405e5baae51b
             }
                         
             random = new Random();
@@ -1226,7 +1232,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
 //    	System.out.println("forward to neighbor plane   "+destinationSerialNumberOfPlane);
     	List<DTNHost> allCommunicationNodes = new ArrayList<DTNHost>();
     	//找出所有目的节点轨道平面上的可以支持跨平面通信的卫星
-    	for (DTNHost h : this.CommunicationNodesList.keySet()){
+    	for (DTNHost h : this.CommunicationNodesList.keySet()){//这里的CommunicationNodesList里记录的轨道平面编号是从0开始的
     		if (this.CommunicationNodesList.get(h) + 1 == destinationSerialNumberOfPlane)
     			allCommunicationNodes.add(h);
     	}
