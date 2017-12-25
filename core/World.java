@@ -7,7 +7,6 @@ package core;
 import input.EventQueue;
 import input.ExternalEvent;
 import input.ScheduledUpdatesQueue;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

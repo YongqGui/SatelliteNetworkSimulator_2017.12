@@ -155,7 +155,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
             if (s.getBoolean("EnableGEO")){
                 GEO_TOTAL_SATELLITES = s.getInt("nrofMEO");//总节点数
                 GEO_TOTAL_PLANE = s.getInt("nrofMEOPlane");//总轨道平面数
-                GEO_NROF_S_EACHPLANE = MEO_TOTAL_SATELLITES/MEO_TOTAL_PLANE;//每个轨道平面上的节点数
+  
             }
                         
             random = new Random();
@@ -218,7 +218,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
 
         // try to send the message in the message buffer
         for (Message msg : messages) {
-        	if (checkMsgShouldGetRoutingOrNot(msg) == false)
+        	if (checkMsgShouldGetRoutingOrNot(msg) == false) 
         		continue;
 //            //Confirm message's TTL only has 1 minutes, will be drop by itself
 //            if (msg.getId().contains("Confirm") || msg.getId().contains("ClusterInfo"))
@@ -228,18 +228,13 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         }
 
     }
+    
     /**
      * check if msg is being sending or not
      * @param msg
      * @return
      */
     public boolean checkMsgShouldGetRoutingOrNot(Message msg){
-    	if(this.sendingConnections.size() >= 2){
-//			System.out.println("-------------------------  当前节点为："
-//					+ this.getHost() + "  当前节点在使用的发送链路为："
-//					+ this.sendingConnections.size() + this.sendingConnections);
-    	}
-
     	for (Connection con : this.sendingConnections){
     		if (msg.getId().contains(con.getMessage().getId())){
     			//throw new SimError("error" );
@@ -248,6 +243,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     	}
     	return true;
     }
+    
     /** transform the message Collection to List
      * @param messages
      * @return
@@ -285,9 +281,9 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     public void helloProtocol(){
         // TODO helloProtocol
     }
+    
     /**
      * Update router table, find a routing path and try to send the message
-     *
      * @param msg
      * @return
      */
