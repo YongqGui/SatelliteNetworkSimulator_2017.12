@@ -473,7 +473,11 @@ public class SimScenario implements Serializable {
             	if (h.getMovementModel() instanceof SatelliteMovement)
             		((SatelliteMovement)h.getMovementModel()).initSatelliteInfo();
             }
-            
+            //set static clustering for LEO nodes
+            if (!((SatelliteMovement)hosts.get(0).getMovementModel()).getDynamicClustering()){
+            	//System.out.println("dynamic false!");
+            	((SatelliteMovement)hosts.get(0).getMovementModel()).getSatelliteLinkInfo().initStaticClustering();
+            }
         }
         
         // Set the multiThread label according to user's setting
@@ -910,7 +914,7 @@ public class SimScenario implements Serializable {
 		//nrofPlane = m/NROF_S_EACHPLANE + 1;//卫星所属轨道平面编号
 		//nrofSatelliteINPlane = m - (nrofPlane - 1) * NROF_S_EACHPLANE;//卫星在轨道平面内的编号
 		
-        parameters[6] = 2;// '2' indicates LEO satellite
+        parameters[6] = 3;// '3' indicates GEO satellite
         
 		return parameters;
 	}
@@ -1078,7 +1082,7 @@ public class SimScenario implements Serializable {
 		//nrofPlane = m/NROF_S_EACHPLANE + 1;//卫星所属轨道平面编号
 		//nrofSatelliteINPlane = m - (nrofPlane - 1) * NROF_S_EACHPLANE;//卫星在轨道平面内的编号
 		
-		parameters[6] = 2;// '2' indicates MEO satellite
+		parameters[6] = 3;// '3' indicates GEO satellite
 		
 		return parameters;
 	}

@@ -57,7 +57,7 @@ Group.comfirmMessageSize = 1
 # LEO卫星节点参数
 Group.nrofCommunicationNodesInEachPlane = 4
 Group.nrofLEO = 20
-Group.nrofLEOPlanes = 2
+Group.nrofLEOPlanes = 4
 Group.LEO_OrbitPlaneAngle = 60
 Group.LEO_Eccentricity = 0
 Group.LEO_Radius = 500

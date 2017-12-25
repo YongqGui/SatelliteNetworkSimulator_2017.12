@@ -60,7 +60,7 @@ public abstract class MessageRouter {
     /** indicates that if this node is communication satellites*/
     public boolean CommunicationSatellitesLabel;
     /** record all communication nodes and their orbit plane number*/
-    public HashMap<DTNHost, Integer> CommunicationNodesList;
+    public HashMap<DTNHost, Integer> CommunicationNodesList;//注意：这里记录的平面编号从0开始
     
 	/* Return values when asking to start a transmission:
 	 * RCV_OK (0) means that the host accepts the message and transfer started, 
