@@ -198,7 +198,7 @@ public class SPNRmodify extends ActiveRouter{
 		Settings setting = new Settings("userSetting");
 		Settings sat = new Settings("Group");
 		int TOTAL_SATELLITES = sat.getInt("nrofHosts");//总节点数
-		int TOTAL_PLANE = setting.getInt("nrofLEOPlanes");//总轨道平面数
+		int TOTAL_PLANE = sat.getInt("nrofLEOPlanes");//总轨道平面数 nrofLEOPlanes
 		int NROF_S_EACHPLANE = TOTAL_SATELLITES/TOTAL_PLANE;//每个轨道平面上的节点数
 		
 		int thisHostAddress = this.getHost().getAddress();
@@ -1344,6 +1344,7 @@ public class SPNRmodify extends ActiveRouter{
 			for (int i=0; i<rows+2; i++) {
 				for (int j=0; j<cols+2; j++) {
 					for (int n=0;n<zs+2; n++){//新增三维变量
+						System.out.println("当前仿真时间为："+SimClock.getTime());
 						this.cells[i][j][n] = new GridCell();
 						cells[i][j][n].setNumber(i, j, n);
 					}
@@ -2186,7 +2187,7 @@ public class SPNRmodify extends ActiveRouter{
 				throw new SimError("Location " + c + " is out of world's bounds");
 			//assert row > 0 && row <= rows && col > 0 && col <= cols : "Location " + 
 			//c + " is out of world's bounds";
-		
+			
 			return this.cells[row][col][z];
 		}
 		

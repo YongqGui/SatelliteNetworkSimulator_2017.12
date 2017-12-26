@@ -153,15 +153,9 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
             }
             //GEO
             if (s.getBoolean("EnableGEO")){
-<<<<<<< HEAD
-                GEO_TOTAL_SATELLITES = s.getInt("nrofMEO");//总节点数
-                GEO_TOTAL_PLANE = s.getInt("nrofMEOPlane");//总轨道平面数
-  
-=======
                 GEO_TOTAL_SATELLITES = s.getInt("nrofGEO");//总节点数
                 GEO_TOTAL_PLANE = s.getInt("nrofGEOPlane");//总轨道平面数
                 GEO_NROF_S_EACHPLANE = GEO_TOTAL_SATELLITES/GEO_TOTAL_PLANE;//每个轨道平面上的节点数
->>>>>>> fcc2628832a286fb77aa2d408a12405e5baae51b
             }
                         
             random = new Random();
@@ -459,9 +453,9 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         }
 
         if (this.routerTable.containsKey(msg.getTo())) {
-//            System.out.println("find the path!  " +
-//            		this.routerTable.get(msg.getTo())+"   "+ getSatelliteType() 
-//            				+" to "+ msg.getTo().getSatelliteType()+"  " + msg);
+            System.out.println("find the path!  " +
+            		this.routerTable.get(msg.getTo())+"   "+ getSatelliteType() 
+            				+" to "+ msg.getTo().getSatelliteType()+"  " + msg);
             return true;
         } else {
             return false;
@@ -506,7 +500,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                     	List<Tuple<Integer, Boolean>> path = findPathInSameLEOPlane(this.getHost(), communicationLEO);
                     	
                         if (!path.isEmpty()){
-//                        	System.out.println("先交给通信LEO节点进行转发   to" + to);
+                        	System.out.println("先交给通信LEO节点进行转发   to" + to);
                             routerTable.put(to, path);
                         }
                 	}
@@ -527,8 +521,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                    	searchArea.add(this.getHost());
                    	//this.getMEOtoMEOTopology();
                 	optimzedShortestPathSearch(msg, searchArea);
-//                	if (this.routerTable.get(to) != null)
-//                		System.out.println(this.getHost()+" 找到了LEO to MEO 的路径"+msg);
+                	if (this.routerTable.get(to) != null)
+                		System.out.println(this.getHost()+" 找到了LEO to MEO 的路径"+msg);
             	}
             	//作为LEO遥感节点，直接先把数据传到通信节点上
             	else{
@@ -536,7 +530,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 	List<Tuple<Integer, Boolean>> path = findPathInSameLEOPlane(this.getHost(), communicationLEO);
                 	
                     if (!path.isEmpty()){
-//                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
+                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
                         routerTable.put(to, path);
                     }
             	}                                          
@@ -559,8 +553,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                     localHostsList.addAll(findMEOHosts());
                     localHostsList.add(nearestCLEO);
                 	this.shortestPathSearch(msg, topologyInfo, localHostsList);
-//                	if (this.routerTable.containsKey(to))
-//                		System.out.println("LEO to GEO" + this.getHost() + "找到了最短路径");
+                	if (this.routerTable.containsKey(to))
+                		System.out.println("LEO to GEO" + this.getHost() + "找到了最短路径");
                 	
                 }
                 //否则先交给通信节点
@@ -569,7 +563,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 	List<Tuple<Integer, Boolean>> path = findPathInSameLEOPlane(this.getHost(), communicationLEO);
                 	
                     if (!path.isEmpty()){
-//                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
+                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
                         routerTable.put(to, path);
                     }
                 }
@@ -609,7 +603,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
 	           		shortestPathSearch(msg, topologyInfo, localHostsList);
 	           		
 	            	if (this.routerTable.containsKey(nearestCLEO)){
-//	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
+	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
 	            		this.routerTable.put(to, this.routerTable.get(nearestCLEO));//添加去目的节点的路径
 	            		return;
 	            	}  
@@ -672,12 +666,12 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 localHostsList.addAll(findMEOHosts());
                 localHostsList.add(nearestCLEO);
             	this.shortestPathSearch(msg, topologyInfo, localHostsList);
-//            	if (this.routerTable.containsKey(to))
-//            		System.out.println("GEO" + this.getHost() + "找到了最短路径");
+            	if (this.routerTable.containsKey(to))
+            		System.out.println("GEO" + this.getHost() + "找到了最短路径");
             	
             	if (!to.getRouter().CommunicationSatellitesLabel){
 	            	if (this.routerTable.containsKey(nearestCLEO)){
-//	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
+	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
 	            		this.routerTable.put(to, this.routerTable.get(nearestCLEO));//添加去目的节点的路径
 	            		return;
 	            	}  
@@ -1216,9 +1210,9 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     		if (nextHop.getAddress() == to.getAddress()){
     			srcRouter.routerTable.put(to, path); 
     			break;
-    		}       			
+    		}
     	}
-//    	System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
+    	System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
         return path;
     }
  
@@ -1229,15 +1223,15 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     public boolean msgFromLEOForwardToNeighborPlane(Message msg, DTNHost to){
     	
     	int destinationSerialNumberOfPlane = to.getAddress()/LEO_NROF_S_EACHPLANE + 1;
-//    	System.out.println("forward to neighbor plane   "+destinationSerialNumberOfPlane);
+    	System.out.println("forward to neighbor plane   "+destinationSerialNumberOfPlane);
     	List<DTNHost> allCommunicationNodes = new ArrayList<DTNHost>();
     	//找出所有目的节点轨道平面上的可以支持跨平面通信的卫星
     	for (DTNHost h : this.CommunicationNodesList.keySet()){//这里的CommunicationNodesList里记录的轨道平面编号是从0开始的
     		if (this.CommunicationNodesList.get(h) + 1 == destinationSerialNumberOfPlane)
     			allCommunicationNodes.add(h);
     	}
-//    	System.out.println("all communication nodes: "+allCommunicationNodes);
-    	//System.out.println("在邻居轨道! 邻居轨道上可通信节点： "+allCommunicationNodes+" connections: "+this.getConnections());
+    	System.out.println("all communication nodes: "+allCommunicationNodes);
+    	System.out.println("在邻居轨道! 邻居轨道上可通信节点： "+allCommunicationNodes+" connections: "+this.getConnections());
     	for (DTNHost h : allCommunicationNodes){
     		Connection con = this.findConnection(h.getAddress(), msg);
     		if (con != null){
@@ -1245,7 +1239,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                         new ArrayList<Tuple<Integer, Boolean>>();
                 path.add(new Tuple<Integer, Boolean>(h.getAddress(), false));
                 routerTable.put(to, path);
-//                System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
+                System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
                 return true;
     		}
     	}   
@@ -1288,12 +1282,12 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     	
     	if (this.getHost().getRouter().CommunicationSatellitesLabel &&
     			LEOci.updateManageHosts(msg).isEmpty()){
-//            System.out.println(this.getHost()+" 通信节点LEO 孤立！没有MEO连接！  "+msg);
+            System.out.println(this.getHost()+" 通信节点LEO 孤立！没有MEO连接！  "+msg);
     		return;
     	}
     	   	
     	if (((SatelliteMovement)to.getMovementModel()).getSatelliteLinkInfo().getLEOci() == null){
-//    		System.out.println(msg+" not initiliation LEOci! "+to);
+    		System.out.println(msg+" not initiliation LEOci! "+to);
     		throw new SimError("not initiliation LEOci!");
     		//return;
     	}
@@ -1317,7 +1311,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     	
     	if (to.getRouter().CommunicationSatellitesLabel == false 
     			&& this.routerTable.containsKey(nearestCLEOtoDestination)){
-//    		System.out.println(msg+ " 搜索到通过MEO转发的最短路径！ to" + to);
+    		System.out.println(msg+ " 搜索到通过MEO转发的最短路径！ to" + to);
     		List<Tuple<Integer, Boolean>> path = this.routerTable.get(nearestCLEOtoDestination);
     		path.addAll(lastPath);
     		this.routerTable.put(to, path);//添加去目的节点的路径
