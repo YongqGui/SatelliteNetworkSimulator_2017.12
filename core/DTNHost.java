@@ -399,6 +399,9 @@ public class DTNHost implements Comparable<DTNHost> {
 			if (multiThread)
 				multiThreadInterfaceUpdate();
 			for (NetworkInterface i : net) {
+//				System.out.println("当前节点为：" + this.address
+//						+ "  DTNHsot.java 网络接口数目：" + net.size() + "  网络接口类型："
+//						+ i.getInterfaceType() + "  网络接口：" + i);
 				i.update();
 			}
 		}

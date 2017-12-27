@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-
 import movement.SatelliteMovement;
 import core.CBRConnection;
 import core.Connection;

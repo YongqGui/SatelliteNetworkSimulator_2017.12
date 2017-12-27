@@ -29,17 +29,19 @@ Group.filebuffersize = 1000k
 
 # 链路模块参数
 # one satellite node can bind multiple interfaces
-Group.nrofInterfaces = 1
+Group.nrofInterfaces = 2
 Group.interface1 = Interface1
 Group.interface2 = Interface2
 Interface1.type = SimpleSatelliteInterface
 Interface1.linkDelayRange = 0.1,1
 Interface1.transmitSpeed = 500k
-Interface1.transmitRange = 40000
+Interface1.transmitRange = 15000
+Interface1.nrofRadioInterface = 2
 Interface2.type = SatelliteLaserInterface
-Interface2.linkDelayRange = 10,100
+Interface2.linkDelayRange = 0.1,1
 Interface2.transmitSpeed = 200M
-Interface2.transmitRange = 40000
+Interface2.transmitRange = 15000
+
 
 # 设置阈值，大于此阈值通过激光链路走，小于此阈值的从微波链路走
 Interface.MessageThreshold = 1M
@@ -51,7 +53,6 @@ Interface.reTransmitTime = 2
 # 是否允许动态分簇
 Interface.DynamicClustering = true
 DynamicMultiLayerSatelliteRouter.Optimized = false
-
 
 # LEO卫星节点参数
 Group.nrofCommunicationNodesInEachPlane = 4
@@ -85,9 +86,9 @@ Scenario.nrofHostGroups = 1
 ## Scenario settings
 Scenario.name = satellite network simulation
 Scenario.simulateConnections = true
-Scenario.updateInterval = 1
+Scenario.updateInterval = 5
 # 43200s == 12h
-Scenario.endTime = 2000
+Scenario.endTime = 8000
 
 
 ## Interface-specific settings:
@@ -104,7 +105,7 @@ Scenario.endTime = 2000
 Interface.transmitSpeed = 250k
 #注意：ONE中距离单位是meters
 #由于JAT中距离单位为km，因此我们将ONE中的距离单位统一视为km，这样只会在自带的图形界面单位上产生误解，但内部程序的逻辑上没有问题
-Interface.transmitRange = 2000
+Interface.transmitRange = 4000
 
 
 ## Group-specific settings:
@@ -171,8 +172,9 @@ Group.Constellation = WalkerDelta
 #Group.router = SourceRoutingDijsktraSearchBasedonTemporalGraph
 #Group.router = DirectDeliveryRouter
 #Group.router = ShortestPathFirstRouter
-Group.router = OptimizedClusteringRouter
-#Group.router = DynamicMultiLayerSatelliteRouter
+#Group.router = OptimizedClusteringRouter
+Group.router = DynamicMultiLayerSatelliteRouter
+
 
 #分簇路由
 #Group.router = ClusteringRouter
@@ -185,7 +187,7 @@ Group.router = OptimizedClusteringRouter
 #Group.Pre_or_onlineOrbitCalculation = preOrbitCalculation
 Group.Pre_or_onlineOrbitCalculation = onlineOrbitCalculation
 #Group.router = SPNRmodify
-Group.layer = 2
+Group.layer = 1
 
 #Group.router = CGR
 #Interface.type = ContactGraphInterface
@@ -205,7 +207,7 @@ Group.waitTime = 0, 120
 # Walking speeds
 Group.speed = 0.5, 1.5
 # Message TTL of 300 minutes (5 hours)
-Group.msgTtl = 300
+Group.msgTtl = 10
 
 
 #Group.nrofHosts = [10;20;30;40;50]
@@ -229,7 +231,7 @@ Events1.interval = 1,1
 # Message sizes (500kB - 1MB)
 
 #Events1.size = 100k,1M
-Events1.size = 10k,2000k
+Events1.size = 800k,1200k
 # range of message source/destination addresses
 
 #Events1.hosts = [0,9;0,19;0,29;0,39;0,49]修改，注意hosts和tohosts包括下界但不包括上界，即[0, 9)
@@ -244,8 +246,6 @@ Events1.prefix = M
 MovementModel.rngSeed = 1
 # World's size for Movement Models without implicit size (width, height; meters)
 MovementModel.worldSize = 100000, 100000, 100000
-# 针对 SPNR方法设置参数
-#MovementModel.worldSize = 10000, 10000, 10000
 # How long time to move hosts in the world before real simulation
 MovementModel.warmup = 10
 

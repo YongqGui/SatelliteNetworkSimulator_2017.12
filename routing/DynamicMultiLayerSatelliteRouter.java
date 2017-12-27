@@ -119,7 +119,11 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     /** the router table comes from routing algorithm */
     private HashMap<DTNHost, List<Tuple<Integer, Boolean>>>
             routerTable = new HashMap<DTNHost, List<Tuple<Integer, Boolean>>>();
-
+	/** number of different interface*/
+    public int nrofRadioInterface;
+	public int nrofSendingLaserInterface;
+	public int nrofSendingRadioInterface;
+	
 
     public DynamicMultiLayerSatelliteRouter(Settings s) {
         super(s);
@@ -137,7 +141,11 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     @Override
     public void init(DTNHost host, List<MessageListener> mListeners) {
         super.init(host, mListeners);
-
+        
+        Settings s1 = new Settings("Interface1");
+        nrofRadioInterface = s1.getInt("nrofRadioInterface");
+        System.out.println("可用微波接口的数目为："+nrofRadioInterface);
+        
         if (!initLabel){ 
         	//LEO
             Settings sat = new Settings("Group");
@@ -192,7 +200,14 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     @Override
     public void update() {
         super.update();
-
+//        System.out.println(this.sendingConnections.size());
+        if(this.sendingConnections.size()>=2){
+        	System.out.println("当前节点为："+this.getHost()+" 动态路由算法："+this.sendingConnections.size()+" "+this.sendingConnections);
+//        	for(Connection con : this.sendingConnections){
+//                System.out.println("链路类型为："+con.getLinkType());
+//        	}
+        }
+        
         //根据先验信息对LEO进行分组，并确定各个LEO的固定管理MEO节点，从而无需信令交互进行动态分簇
 //        if (!LEO_MEOClusteringInitLable)
 //            initLEO_MEOClusteringRelationship();
@@ -202,9 +217,11 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
             //TODO deal with isolate LEO node
             return; // for isolate LEO node, it does noting
         }
+
 //        if (isTransferring()) { // judge the link is occupied or not
 //            return; // can't start a new transfer
 //        }
+        
         //helloProtocol();//执行hello包的维护工作
         if (!canStartTransfer())
             return;
@@ -227,6 +244,74 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 return;
         }
 
+    }
+    
+    /**
+     * Try to send the message through a specific connection.
+     *
+     * @param t
+     * @return
+     */
+    public boolean sendMsg(Tuple<Message, Connection> t) {    	
+        if (t == null || t.getValue() == null) {
+            //throw new SimError("send msg error!");
+            return false;
+        } else {
+        	// 判断网络接口个数，满足同时传输链路数目要求！
+        	nrofSendingLaserInterface = 0;	nrofSendingRadioInterface = 0; 
+        	for(Connection con : this.sendingConnections ){       		
+        		if(con.getLinkType().equals("RadioInterface")){
+        			nrofSendingRadioInterface++;
+        		}else if(con.getLinkType().equals("LaserInterface")){
+        			nrofSendingLaserInterface++;
+        		}
+        	}
+        	if(t.getValue().getLinkType().equals("RadioInterface")){
+        		if(nrofSendingRadioInterface>=nrofRadioInterface){
+            		return false;
+        		}
+        	}else{
+        		if(nrofSendingLaserInterface>=1){
+            		return false;
+        		}
+        	}
+        	
+
+            if (tryMessageToConnection(t) != null)//列表第一个元素从0指针开始！！！
+                return true;//只要成功传一次，就跳出循环
+            else
+                return false;
+        }
+    }
+    
+    /**
+     * Returns true if this router is transferring something at the moment or
+     * some transfer has not been finalized.
+     *
+     * @return true if this router is transferring something
+     */
+    @Override
+    public boolean isTransferring() {
+        //判断该节点能否进行传输消息，存在以下情况一种以上的，直接返回，不更新,即现在信道已被占用：
+        //情形1：本节点正在向外传输
+        if (this.sendingConnections.size() > 0) {//protected ArrayList<Connection> sendingConnections;
+            return true; // sending something
+        }        
+        List<Connection> connections = getConnections();
+        //情型2：没有邻居节点
+        if (connections.size() == 0) {
+            return false; // not connected
+        }
+        //情型3：有邻居节点，但自身与周围节点正在传输
+        //模拟了无线广播链路，即邻居节点之间同时只能有一对节点传输数据!
+        for (int i = 0, n = connections.size(); i < n; i++) {
+            Connection con = connections.get(i);
+            //isReadyForTransfer返回false则表示有信道在被占用，因此对于广播信道而言不能传输
+            if (!con.isReadyForTransfer()) {
+                return true;    // a connection isn't ready for new transfer
+            }
+        }
+        return false;
     }
     
     /**
@@ -453,9 +538,9 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         }
 
         if (this.routerTable.containsKey(msg.getTo())) {
-            System.out.println("find the path!  " +
-            		this.routerTable.get(msg.getTo())+"   "+ getSatelliteType() 
-            				+" to "+ msg.getTo().getSatelliteType()+"  " + msg);
+//            System.out.println("find the path!  " +
+//            		this.routerTable.get(msg.getTo())+"   "+ getSatelliteType() 
+//            				+" to "+ msg.getTo().getSatelliteType()+"  " + msg);
             return true;
         } else {
             return false;
@@ -477,7 +562,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 	return;
                 }
                 //目的节点是否在自身所属轨道平面上
-                if (LEOci.getAllHostsInSamePlane().contains(to)){                	
+                if (LEOci.getAllHostsInSamePlane().contains(to)){ 
+//                	System.out.println(this.getHost() +"  "+ to );
                     findPathInSameLEOPlane(this.getHost(), to);
                 }
                 else{
@@ -500,7 +586,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                     	List<Tuple<Integer, Boolean>> path = findPathInSameLEOPlane(this.getHost(), communicationLEO);
                     	
                         if (!path.isEmpty()){
-                        	System.out.println("先交给通信LEO节点进行转发   to" + to);
+//                        	System.out.println("先交给通信LEO节点进行转发   to" + to);
                             routerTable.put(to, path);
                         }
                 	}
@@ -521,8 +607,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                    	searchArea.add(this.getHost());
                    	//this.getMEOtoMEOTopology();
                 	optimzedShortestPathSearch(msg, searchArea);
-                	if (this.routerTable.get(to) != null)
-                		System.out.println(this.getHost()+" 找到了LEO to MEO 的路径"+msg);
+//                	if (this.routerTable.get(to) != null)
+//                		System.out.println(this.getHost()+" 找到了LEO to MEO 的路径"+msg);
             	}
             	//作为LEO遥感节点，直接先把数据传到通信节点上
             	else{
@@ -530,7 +616,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 	List<Tuple<Integer, Boolean>> path = findPathInSameLEOPlane(this.getHost(), communicationLEO);
                 	
                     if (!path.isEmpty()){
-                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
+//                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
                         routerTable.put(to, path);
                     }
             	}                                          
@@ -553,8 +639,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                     localHostsList.addAll(findMEOHosts());
                     localHostsList.add(nearestCLEO);
                 	this.shortestPathSearch(msg, topologyInfo, localHostsList);
-                	if (this.routerTable.containsKey(to))
-                		System.out.println("LEO to GEO" + this.getHost() + "找到了最短路径");
+//                	if (this.routerTable.containsKey(to))
+//                		System.out.println("LEO to GEO" + this.getHost() + "找到了最短路径");
                 	
                 }
                 //否则先交给通信节点
@@ -563,7 +649,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 	List<Tuple<Integer, Boolean>> path = findPathInSameLEOPlane(this.getHost(), communicationLEO);
                 	
                     if (!path.isEmpty()){
-                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
+//                    	System.out.println("先交给通信LEO节点进行转发   to" + to);
                         routerTable.put(to, path);
                     }
                 }
@@ -603,7 +689,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
 	           		shortestPathSearch(msg, topologyInfo, localHostsList);
 	           		
 	            	if (this.routerTable.containsKey(nearestCLEO)){
-	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
+//	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
 	            		this.routerTable.put(to, this.routerTable.get(nearestCLEO));//添加去目的节点的路径
 	            		return;
 	            	}  
@@ -666,12 +752,12 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 localHostsList.addAll(findMEOHosts());
                 localHostsList.add(nearestCLEO);
             	this.shortestPathSearch(msg, topologyInfo, localHostsList);
-            	if (this.routerTable.containsKey(to))
-            		System.out.println("GEO" + this.getHost() + "找到了最短路径");
+//            	if (this.routerTable.containsKey(to))
+//            		System.out.println("GEO" + this.getHost() + "找到了最短路径");
             	
             	if (!to.getRouter().CommunicationSatellitesLabel){
 	            	if (this.routerTable.containsKey(nearestCLEO)){
-	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
+//	            		System.out.println("搜索到通过MEO转发的最短路径！ to" + to);
 	            		this.routerTable.put(to, this.routerTable.get(nearestCLEO));//添加去目的节点的路径
 	            		return;
 	            	}  
@@ -1212,7 +1298,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     			break;
     		}
     	}
-    	System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
+//    	System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
         return path;
     }
  
@@ -1223,15 +1309,15 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     public boolean msgFromLEOForwardToNeighborPlane(Message msg, DTNHost to){
     	
     	int destinationSerialNumberOfPlane = to.getAddress()/LEO_NROF_S_EACHPLANE + 1;
-    	System.out.println("forward to neighbor plane   "+destinationSerialNumberOfPlane);
+//    	System.out.println("forward to neighbor plane   "+destinationSerialNumberOfPlane);
     	List<DTNHost> allCommunicationNodes = new ArrayList<DTNHost>();
     	//找出所有目的节点轨道平面上的可以支持跨平面通信的卫星
     	for (DTNHost h : this.CommunicationNodesList.keySet()){//这里的CommunicationNodesList里记录的轨道平面编号是从0开始的
     		if (this.CommunicationNodesList.get(h) + 1 == destinationSerialNumberOfPlane)
     			allCommunicationNodes.add(h);
     	}
-    	System.out.println("all communication nodes: "+allCommunicationNodes);
-    	System.out.println("在邻居轨道! 邻居轨道上可通信节点： "+allCommunicationNodes+" connections: "+this.getConnections());
+//    	System.out.println("all communication nodes: "+allCommunicationNodes);
+//    	System.out.println("在邻居轨道! 邻居轨道上可通信节点： "+allCommunicationNodes+" connections: "+this.getConnections());
     	for (DTNHost h : allCommunicationNodes){
     		Connection con = this.findConnection(h.getAddress(), msg);
     		if (con != null){
@@ -1239,7 +1325,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                         new ArrayList<Tuple<Integer, Boolean>>();
                 path.add(new Tuple<Integer, Boolean>(h.getAddress(), false));
                 routerTable.put(to, path);
-                System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
+//                System.out.println(this.getHost()+"  同一个平面内的路径： "+path);
                 return true;
     		}
     	}   
@@ -1282,12 +1368,12 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     	
     	if (this.getHost().getRouter().CommunicationSatellitesLabel &&
     			LEOci.updateManageHosts(msg).isEmpty()){
-            System.out.println(this.getHost()+" 通信节点LEO 孤立！没有MEO连接！  "+msg);
+//            System.out.println(this.getHost()+" 通信节点LEO 孤立！没有MEO连接！  "+msg);
     		return;
     	}
     	   	
     	if (((SatelliteMovement)to.getMovementModel()).getSatelliteLinkInfo().getLEOci() == null){
-    		System.out.println(msg+" not initiliation LEOci! "+to);
+//    		System.out.println(msg+" not initiliation LEOci! "+to);
     		throw new SimError("not initiliation LEOci!");
     		//return;
     	}
@@ -1311,7 +1397,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     	
     	if (to.getRouter().CommunicationSatellitesLabel == false 
     			&& this.routerTable.containsKey(nearestCLEOtoDestination)){
-    		System.out.println(msg+ " 搜索到通过MEO转发的最短路径！ to" + to);
+//    		System.out.println(msg+ " 搜索到通过MEO转发的最短路径！ to" + to);
     		List<Tuple<Integer, Boolean>> path = this.routerTable.get(nearestCLEOtoDestination);
     		path.addAll(lastPath);
     		this.routerTable.put(to, path);//添加去目的节点的路径
@@ -1719,8 +1805,6 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
     	else
     		connectionType = "RadioLink";
     	
-//    	System.out.println("选择使用的链路类型为：" + connectionType);
-    	
         List<Connection> connections = this.getHost().getConnections();
         
         for (Connection c : connections) {
@@ -1744,9 +1828,7 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                     " at " + this);
         Message m = t.getKey();
         Connection con = t.getValue();
-        
-//        System.out.println(m+"  "+SimClock.getTime()+"  当前使用的链路类型为：" + con.getLinkType() + "    链路传输速度为：" + con.getSpeed());
-        
+
         int retVal = startTransfer(m, con);
         if (retVal == RCV_OK) {  //accepted a message, don't try others
             return m;
@@ -1776,54 +1858,9 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         /**至于检查所有的链路占用情况，看本节点是否在对外发送的情况，在update函数中已经检查过了，在此无需重复检查**/
     }
 
-    /**
-     * Try to send the message through a specific connection.
-     *
-     * @param t
-     * @return
-     */
-    public boolean sendMsg(Tuple<Message, Connection> t) {
-        if (t == null || t.getValue() == null) {
-            //throw new SimError("send msg error!");
-            return false;
-        } else {
-            if (tryMessageToConnection(t) != null)//列表第一个元素从0指针开始！！！
-                return true;//只要成功传一次，就跳出循环
-            else
-                return false;
-        }
-    }
 
-    /**
-     * Returns true if this router is transferring something at the moment or
-     * some transfer has not been finalized.
-     *
-     * @return true if this router is transferring something
-     */
-    @Override
-    public boolean isTransferring() {
-        //判断该节点能否进行传输消息，存在以下情况一种以上的，直接返回，不更新,即现在信道已被占用：
-        //情形1：本节点正在向外传输
-        if (this.sendingConnections.size() > 0) {//protected ArrayList<Connection> sendingConnections;
-            return true; // sending something
-        }
 
-        List<Connection> connections = getConnections();
-        //情型2：没有邻居节点
-        if (connections.size() == 0) {
-            return false; // not connected
-        }
-        //情型3：有邻居节点，但自身与周围节点正在传输
-        //模拟了无线广播链路，即邻居节点之间同时只能有一对节点传输数据!
-        for (int i = 0, n = connections.size(); i < n; i++) {
-            Connection con = connections.get(i);
-            //isReadyForTransfer返回false则表示有信道在被占用，因此对于广播信道而言不能传输
-            if (!con.isReadyForTransfer()) {
-                return true;    // a connection isn't ready for new transfer
-            }
-        }
-        return false;
-    }
+
 
 //    /**
 //     * 此重写函数保证在传输完成之后，源节点的信息从messages缓存中删除

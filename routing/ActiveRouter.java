@@ -593,7 +593,11 @@ public abstract class ActiveRouter extends MessageRouter {
 		
 		/* in theory we can have multiple sending connections even though
 		  currently all routers allow only one concurrent sending connection */
-		
+
+//		if(this.sendingConnections.size()>=3){
+//			System.out.println("当前节点为："+this.getHost()+" ActiveRouter.java："+this.sendingConnections.size()+" "+this.sendingConnections);
+//		}
+
 		for (int i=0; i<this.sendingConnections.size(); ) {
 			boolean removeCurrent = false;
 			Connection con = sendingConnections.get(i);
@@ -627,7 +631,6 @@ public abstract class ActiveRouter extends MessageRouter {
 				}
 				removeCurrent = true;
 			} 
-			
 			if (removeCurrent) {
 				// if the message being sent was holding excess buffer, free it
 				if (this.getFreeBufferSize() < 0) {
