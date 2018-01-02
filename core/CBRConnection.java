@@ -13,6 +13,7 @@ public class CBRConnection extends Connection {
 	private int speed;
 	private double transferDoneTime;
 	private double linkDelay;
+
 	/**
 	 * Creates a new connection between nodes and sets the connection
 	 * state to "up".
@@ -56,6 +57,9 @@ public class CBRConnection extends Connection {
 			this.msgOnFly = newMessage;
 			this.transferDoneTime = SimClock.getTime() + 
 			(1.0*m.getSize()) / this.speed + this.linkDelay;
+			// total transmission delay
+			this.totalTransDelay = (1.0 * m.getSize()) / this.speed
+					+ this.linkDelay;
 		}
 
 		return retVal;
@@ -120,5 +124,4 @@ public class CBRConnection extends Connection {
 		return super.toString() + (isTransferring() ?  
 				" until " + String.format("%.2f", this.transferDoneTime) : "");
 	}
-
 }

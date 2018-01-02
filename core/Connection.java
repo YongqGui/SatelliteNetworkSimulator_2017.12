@@ -31,6 +31,8 @@ public abstract class Connection {
 	protected double probabilityOfInterrupt;
 	/** Whether to allow the link to be interrupted */
 	protected boolean InterruptEnable;
+	/** indicates transmission delay plus link delay*/
+	protected double totalTransDelay;
 
 	/**
 	 * Creates a new connection between nodes and sets the connection state to
@@ -284,5 +286,13 @@ public abstract class Connection {
 	 */
 	public String getLinkType() {
 		return this.linkType;
+	}
+	
+	/**
+	 * get the total transmission delay of this connection
+	 * @return
+	 */
+	public double getTotalTransDelay(){
+		return this.totalTransDelay;
 	}
 }
