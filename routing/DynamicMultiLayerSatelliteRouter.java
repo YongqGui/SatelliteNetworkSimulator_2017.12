@@ -882,8 +882,13 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         this.arrivalTime.clear();
 
         /**全网的传输速率假定为一样的**/
-        double transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
-        System.out.println("---------------------- 这里获取到的链路传输速度：----------------------"+transmitSpeed);
+        double transmitSpeed;
+        if(msg.getSize() < msgThreshold ){
+        	transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
+        } else{
+        	transmitSpeed = this.getHost().getInterface(2).getTransmitSpeed();
+        }
+//        double transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
         /**表示路由开始的时间**/
 
         /**添加链路可探测到的一跳邻居网格，并更新路由表**/
@@ -899,8 +904,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
             	continue;
             DTNHost neiHost = con.getOtherNode(this.getHost());
             sourceSet.add(neiHost);//初始时只有本节点和链路邻居
-            Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();
-            
+//            Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();
+            Double time = getTime() + msg.getSize() / transmitSpeed;
             List<Tuple<Integer, Boolean>> path = new ArrayList<Tuple<Integer, Boolean>>();
             Tuple<Integer, Boolean> hop = new Tuple<Integer, Boolean>(neiHost.getAddress(), false);
             path.add(hop);//注意顺序
@@ -1010,8 +1015,13 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         this.arrivalTime.clear();
 
         /**全网的传输速率假定为一样的**/
-        double transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
-        System.out.println("---------------------- 这里获取到的链路传输速度：----------------------"+transmitSpeed);
+        double transmitSpeed;
+        if(msg.getSize() < msgThreshold ){
+        	transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
+        } else{
+        	transmitSpeed = this.getHost().getInterface(2).getTransmitSpeed();
+        }
+//        double transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
         /**表示路由开始的时间**/ 
 
         /**添加链路可探测到的一跳邻居网格，并更新路由表**/
@@ -1027,7 +1037,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
             	continue;
             DTNHost neiHost = con.getOtherNode(this.getHost());
             sourceSet.add(neiHost);//初始时只有本节点和链路邻居
-            Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();
+//            Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();
+            Double time = getTime() + msg.getSize() / transmitSpeed;
             List<Tuple<Integer, Boolean>> path = new ArrayList<Tuple<Integer, Boolean>>();
             Tuple<Integer, Boolean> hop = new Tuple<Integer, Boolean>(neiHost.getAddress(), false);
             path.add(hop);//注意顺序
@@ -1136,8 +1147,13 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         this.arrivalTime.clear();
         
         /**全网的传输速率假定为一样的**/
-        double transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
-        System.out.println("---------------------- 这里获取到的链路传输速度：----------------------"+transmitSpeed);
+//        double transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
+        double transmitSpeed;
+        if(msg.getSize() < msgThreshold ){
+        	transmitSpeed = this.getHost().getInterface(1).getTransmitSpeed();
+        } else{
+        	transmitSpeed = this.getHost().getInterface(2).getTransmitSpeed();
+        }
         /**表示路由开始的时间**/
 
         /**添加链路可探测到的一跳邻居网格，并更新路由表**/
@@ -1147,14 +1163,15 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
         searchedSet.add(this.getHost());//初始时只有源节点
 
         for (Connection con : this.getHost().getConnections()) {//添加链路可探测到的一跳邻居，并更新路由表
-        	System.out.println("链路类型为："+con.getLinkType()+"  总的链路传输时延为："+con.getTotalTransDelay());
             if (!localHostsList.contains(con.getOtherNode(this.getHost())))
                 continue;
             if (!isRightConnection(msg, con))//判断是否是正确的链路，配备多接口后需要进行检查
             	continue;
             DTNHost neiHost = con.getOtherNode(this.getHost());
             sourceSet.add(neiHost);//初始时只有本节点和链路邻居
-            Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();
+//            Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();
+            Double time = getTime() + msg.getSize() / transmitSpeed;
+            
             List<Tuple<Integer, Boolean>> path = new ArrayList<Tuple<Integer, Boolean>>();
             Tuple<Integer, Boolean> hop = new Tuple<Integer, Boolean>(neiHost.getAddress(), false);
             path.add(hop);//注意顺序
@@ -1194,8 +1211,8 @@ public class DynamicMultiLayerSatelliteRouter extends ActiveRouter {
                 for (DTNHost eachNeighborNetgrid : neiList) {//startTime.keySet()包含了所有的邻居节点，包含未来的邻居节点
                     if (sourceSet.contains(eachNeighborNetgrid))//确保不回头
                         continue;
-
-                    double time = arrivalTime.get(c) + msg.getSize() / transmitSpeed;
+                    
+                    double time = arrivalTime.get(c) + msg.getSize() / transmitSpeed;                    
                     /**添加路径信息**/
                     List<Tuple<Integer, Boolean>> path = new ArrayList<Tuple<Integer, Boolean>>();
                     if (this.routerTable.containsKey(c))
