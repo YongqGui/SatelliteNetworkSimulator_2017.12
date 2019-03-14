@@ -163,7 +163,6 @@ public class ShortestPathFirstRouter extends ActiveRouter {
         		return;
         	}
         }
-        
     }
     
     /** transform the message Collection to List
@@ -305,7 +304,7 @@ public class ShortestPathFirstRouter extends ActiveRouter {
         	//routing path will be calculated in each hop
             Tuple<Message, Connection> t =
                     findPathFromRouterTabel(msg);
-//            System.out.println("消息传输元组为："+t);
+//            System.out.println("ShortestPathFirstRouter.java 消息传输元组为："+t);
             return sendMsg(t);
         }
     }
@@ -507,7 +506,7 @@ public class ShortestPathFirstRouter extends ActiveRouter {
         sourceSet.add(this.getHost());//初始时只有源节点所
         searchedSet.add(this.getHost());//初始时只有源节点
 
-        for (Connection con : this.getHost().getConnections()) {//添加链路可探测到的一跳邻居，并更新路由表
+        for (Connection con : this.getHost().getConnections()) {//添加链路可探测到的一跳邻居，并更新路由表        	
             DTNHost neiHost = con.getOtherNode(this.getHost());
             sourceSet.add(neiHost);//初始时只有本节点和链路邻居
             Double time = getTime() + msg.getSize() / this.getHost().getInterface(1).getTransmitSpeed();

@@ -57,9 +57,6 @@ public class CBRConnection extends Connection {
 			this.msgOnFly = newMessage;
 			this.transferDoneTime = SimClock.getTime() + 
 			(1.0*m.getSize()) / this.speed + this.linkDelay;
-			// total transmission delay
-//			this.totalTransDelay = (1.0 * m.getSize()) / this.speed
-//					+ this.linkDelay;
 		}
 
 		return retVal;

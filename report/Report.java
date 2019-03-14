@@ -124,7 +124,7 @@ public abstract class Report {
 			if (outputInterval == -1) {
 				outFileName += OUT_SUFFIX; // no intervalled reports
 			}
-			
+
 		}
 				
 		checkDirExistence(outFileName);
